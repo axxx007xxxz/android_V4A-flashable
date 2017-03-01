@@ -1,3 +1,8 @@
 #!/bin/bash
 
-zip -qr V4A.zip * -x .git*
+zipname="V4A.zip"
+if [ -f "$zipname" ]
+	then
+		rm -f $zipname
+fi
+zip -qr $zipname * -x .git*
