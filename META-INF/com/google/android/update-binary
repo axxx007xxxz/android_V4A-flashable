@@ -15,77 +15,41 @@ ui_print() {
   done
 }
 
-ch_con() {
-  LD_LIBRARY_PATH=$SYSTEMLIB /system/toolbox chcon -h u:object_r:system_file:s0 $1
-  LD_LIBRARY_PATH=$SYSTEMLIB /system/bin/toolbox chcon -h u:object_r:system_file:s0 $1
-  chcon -h u:object_r:system_file:s0 $1
-  LD_LIBRARY_PATH=$SYSTEMLIB /system/toolbox chcon u:object_r:system_file:s0 $1
-  LD_LIBRARY_PATH=$SYSTEMLIB /system/bin/toolbox chcon u:object_r:system_file:s0 $1
-  chcon u:object_r:system_file:s0 $1
-}
-
-ch_con_ext() {
-  LD_LIBRARY_PATH=$SYSTEMLIB /system/toolbox chcon $2 $1
-  LD_LIBRARY_PATH=$SYSTEMLIB /system/bin/toolbox chcon $2 $1
-  chcon $2 $1
-}
-
-ln_con() {
-  LD_LIBRARY_PATH=$SYSTEMLIB /system/toolbox ln -s $1 $2
-  LD_LIBRARY_PATH=$SYSTEMLIB /system/bin/toolbox ln -s $1 $2
-  ln -s $1 $2
-  ch_con $2
-}
-
-set_perm() {
-  chown $1.$2 $4
-  chown $1:$2 $4
-  chmod $3 $4
-  ch_con $4
-  ch_con_ext $4 $5
-}
-
 cp_perm() {
-  rm $5
-  if [ -f "$4" ]; then
-    cat $4 > $5
-    set_perm $1 $2 $3 $5 $6
-  fi
+  cp $1 $2
+  chmod $3 $2
 }
 
 mount -o ro -t auto /system
 mount -o ro -t auto /vendor
 
-if [ -z "$BIN" ]; then
-  # TWRP went full retard
-  if [ ! -f "/sbin/unzip" ]; then
-    ui_print "- BAD RECOVERY DETECTED, NO UNZIP, ABORTING"
-    exit 1
-  fi
+
+
+if [ ! -f "/sbin/unzip" ]; then
+  ui_print "- NO UNZIP FOUND. ABORTING!"
+  exit 1
 fi
 
 mount -o rw,remount -t auto /system
 mount -o rw,remount -t auto /vendor
 
-cat /system/bin/toolbox > /system/toolbox
-chmod 0755 /system/toolbox
-ch_con /system/toolbox
 
-if [ ! -f "/system/bin/mksh" ]; then
-  MKSH=/system/bin/sh
-else
-  MKSH=/system/bin/mksh
-fi
 
 ui_print "- Extracting files"
 
-cd /tmp
-mkdir v4a
-cd v4a
+TMPDIR=/tmp/v4a
+mkdir "$TMPDIR" && cd "$TMPDIR"
+
+if [ ! -d "$TMPDIR" ]; then
+  ui_print "- CANNOT CREATE NEEDED DIRECTORY. ABORTING!"
+  exit 1
+fi
 
 unzip -o "$ZIP"
-  
-COM=/tmp/v4a/common
+
+
+
+COM=$TMPDIR/common
 
 rm -f /system/etc/audio_effects.conf
 rm -f /system/etc/audio_policy.conf
@@ -93,13 +57,10 @@ rm -f /system/vendor/etc/audio_effects.conf
 rm -f /system/lib/soundfx/libv4a_fx_jb_NEON.so
 rm -f /vendor/etc/audio_effects.conf
 
-cp_perm 0 0 0644 $COM/audio_effects.conf /system/etc/audio_effects.conf
-cp_perm 0 0 0644 $COM/audio_policy.conf /system/etc/audio_policy.conf
-cp_perm 0 0 0644 $COM/libv4a_fx_jb_NEON.so /system/lib/soundfx/libv4a_fx_jb_NEON.so
-
-rm /system/toolbox
+cp_perm $COM/audio_effects.conf /system/etc/audio_effects.conf 0644
+cp_perm $COM/audio_policy.conf /system/etc/audio_policy.conf 0644
+cp_perm $COM/libv4a_fx_jb_NEON.so /system/lib/soundfx/libv4a_fx_jb_NEON.so 0644
 
 umount /vendor
 umount /system
-
 ui_print "Done."
