@@ -17,7 +17,6 @@ ui_print() {
 
 cp_perm() {
   cp $1 $2
-  chown $3.$4 $2
   chown $3:$4 $2
   chmod $5 $2
 }
