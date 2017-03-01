@@ -5,4 +5,4 @@ if [ -f "$zipname" ]
 	then
 		rm -f $zipname
 fi
-zip -qr $zipname * -x .git*
+zip -qr $zipname * -x .git* zip.sh
