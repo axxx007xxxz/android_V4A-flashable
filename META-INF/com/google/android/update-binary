@@ -17,7 +17,9 @@ ui_print() {
 
 cp_perm() {
   cp $1 $2
-  chmod $3 $2
+  chown $3.$4 $2
+  chown $3:$4 $2
+  chmod $5 $2
 }
 
 mount -o ro -t auto /system
@@ -58,8 +60,8 @@ rm -f $root/system/vendor/etc/audio_effects.conf
 rm -f /vendor/etc/audio_effects.conf
 rm -f $root/system/lib/soundfx/libv4a_fx_jb_NEON.so
 
-cp_perm $COM/audio_effects.conf $root/system/etc/audio_effects.conf 0644
-cp_perm $COM/libv4a_fx_jb_NEON.so $root/system/lib/soundfx/libv4a_fx_jb_NEON.so 0644
+cp_perm $COM/audio_effects.conf $root/system/etc/audio_effects.conf 0 0 0644
+cp_perm $COM/libv4a_fx_jb_NEON.so $root/system/lib/soundfx/libv4a_fx_jb_NEON.so 0 0 0644
 
 umount /vendor
 umount /system
