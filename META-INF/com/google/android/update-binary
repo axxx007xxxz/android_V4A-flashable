@@ -51,15 +51,17 @@ unzip -o "$ZIP"
 
 COM=$TMPDIR/common
 
-rm -f /system/etc/audio_effects.conf
-rm -f /system/etc/audio_policy.conf
-rm -f /system/vendor/etc/audio_effects.conf
-rm -f /system/lib/soundfx/libv4a_fx_jb_NEON.so
+test -f /system/system/build.prop && root=/system
+
+rm -f $root/system/etc/audio_effects.conf
+rm -f $root/system/etc/audio_policy.conf
+rm -f $root/system/vendor/etc/audio_effects.conf
+rm -f $root/system/lib/soundfx/libv4a_fx_jb_NEON.so
 rm -f /vendor/etc/audio_effects.conf
 
-cp_perm $COM/audio_effects.conf /system/etc/audio_effects.conf 0644
-cp_perm $COM/audio_policy.conf /system/etc/audio_policy.conf 0644
-cp_perm $COM/libv4a_fx_jb_NEON.so /system/lib/soundfx/libv4a_fx_jb_NEON.so 0644
+cp_perm $COM/audio_effects.conf $root/system/etc/audio_effects.conf 0644
+cp_perm $COM/audio_policy.conf $root/system/etc/audio_policy.conf 0644
+cp_perm $COM/libv4a_fx_jb_NEON.so $root/system/lib/soundfx/libv4a_fx_jb_NEON.so 0644
 
 umount /vendor
 umount /system
