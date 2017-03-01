@@ -139,12 +139,12 @@ rm -f /vendor/etc/audio_effects.conf
 rm -f /system/etc/audio_effects.conf
 rm -f /system/etc/audio_policy.conf
 rm -f /system/vendor/etc/audio_effects.conf
-rm -f /system/lib/soundfx/libv4a_fx_ics.so
+rm -f /system/lib/soundfx/libv4a_fx_jb_NEON.so
 
 
 cp_perm 0 0 0644 $COM/audio_effects.conf /system/etc/audio_effects.conf
 cp_perm 0 0 0644 $COM/audio_policy.conf /system/etc/audio_policy.conf
-cp_perm 0 0 0644 $COM/libv4a_fx_ics.so /system/lib/soundfx/libv4a_fx_ics.so
+cp_perm 0 0 0644 $COM/libv4a_fx_jb_NEON.so /system/lib/soundfx/libv4a_fx_jb_NEON.so
 
 rm /system/toolbox
 
