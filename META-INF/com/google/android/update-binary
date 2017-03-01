@@ -1,17 +1,18 @@
 #!/sbin/sh
 #
-# Benzo Rom Viper4Android libraries and conf files installer.
+# CandyRoms ViPER4Android installer
 #
-# Used from SuperSU installer ZIP
-# Copyright (c) 2012-2014 - Chainfire
-#
+# Thanks Chainfire and osm0sis
 
-OUTFD=$2
-ZIP=$3
+
+OUTFD=/proc/self/fd/$2
+ZIP="$3"
 
 ui_print() {
-  echo -n -e "ui_print $1\n" > /proc/self/fd/$OUTFD
-  echo -n -e "ui_print\n" > /proc/self/fd/$OUTFD
+  until [ ! "$1" ]; do
+    echo -e "ui_print $1\nui_print" > $OUTFD
+    shift
+  done
 }
 
 ch_con() {
@@ -52,59 +53,8 @@ cp_perm() {
   fi
 }
 
-toolbox_mount() {
-  DEV=
-  POINT=
-  FS=
-  for i in `cat /etc/fstab | grep "$1"`; do
-    if [ -z "$DEV" ]; then
-      DEV=$i
-    elif [ -z "$POINT" ]; then
-      POINT=$i
-    elif [ -z "$FS" ]; then
-      FS=$i
-      break
-    fi
-  done
-  mount -t $FS -o rw $DEV $POINT
-  mount -t $FS -o rw,remount $DEV $POINT
-
-  DEV=
-  POINT=
-  FS=
-  for i in `cat /etc/recovery.fstab | grep "$1"`; do
-    if [ -z "$POINT" ]; then
-      POINT=$i
-    elif [ -z "$FS" ]; then
-      FS=$i
-    elif [ -z "$DEV" ]; then
-      DEV=$i
-      break
-    fi
-  done
-  if [ "$FS" = "emmc" ]; then
-    mount -t ext4 -o rw $DEV $POINT
-    mount -t ext4 -o rw,remount $DEV $POINT
-    mount -t f2fs -o rw $DEV $POINT
-    mount -t f2fs -o rw,remount $DEV $POINT
-  else
-    mount -t $FS -o rw $DEV $POINT
-    mount -t $FS -o rw,remount $DEV $POINT
-  fi
-}
-
-mount /system
-mount /data
-mount /vendor
-mount -o rw,remount /system
-mount -o rw,remount /system /system
-mount -o rw,remount /
-mount -o rw,remount / /
-mount -o rw,remount /vendor
-
-toolbox_mount /system
-toolbox_mount /data
-toolbox_mount /vendor
+mount -o ro -t auto /system
+mount -o ro -t auto /vendor
 
 if [ -z "$BIN" ]; then
   # TWRP went full retard
@@ -114,14 +64,17 @@ if [ -z "$BIN" ]; then
   fi
 fi
 
+mount -o rw,remount -t auto /system
+mount -o rw,remount -t auto /vendor
+
 cat /system/bin/toolbox > /system/toolbox
 chmod 0755 /system/toolbox
 ch_con /system/toolbox
 
-MKSH=/system/bin/mksh
-
-if [ ! -f $MKSH ]; then
+if [ ! -f "/system/bin/mksh" ]; then
   MKSH=/system/bin/sh
+else
+  MKSH=/system/bin/mksh
 fi
 
 ui_print "- Extracting files"
@@ -134,13 +87,11 @@ unzip -o "$ZIP"
   
 COM=/tmp/v4a/common
 
-mount -o rw,remount /vendor
-rm -f /vendor/etc/audio_effects.conf
 rm -f /system/etc/audio_effects.conf
 rm -f /system/etc/audio_policy.conf
 rm -f /system/vendor/etc/audio_effects.conf
 rm -f /system/lib/soundfx/libv4a_fx_jb_NEON.so
-
+rm -f /vendor/etc/audio_effects.conf
 
 cp_perm 0 0 0644 $COM/audio_effects.conf /system/etc/audio_effects.conf
 cp_perm 0 0 0644 $COM/audio_policy.conf /system/etc/audio_policy.conf
@@ -150,6 +101,5 @@ rm /system/toolbox
 
 umount /vendor
 umount /system
-umount /data
 
-exit 0
+ui_print "Done."
