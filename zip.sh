@@ -1,8 +1,5 @@
 #!/bin/bash
 
 zipname="V4A.zip"
-if [ -f "$zipname" ]
-	then
-		rm -f $zipname
-fi
-zip -qr $zipname * -x .git* zip.sh
+test -f $zipname && rm -f $zipname
+zip -q9r $zipname * -x .git* zip.sh
