@@ -35,7 +35,7 @@ abort() {
 mount -o ro -t auto /system
 mount -o ro -t auto /vendor
 
-# Abort if unzip isn't found
+# Abort if 'unzip' isn't found
 if [ ! -f "/sbin/unzip" ]; then
   ui_print "- E: No 'unzip' found."
   abort
@@ -51,7 +51,7 @@ ui_print "- Extracting files"
 # Create needed directory
 mkdir "$TMPDIR" && cd "$TMPDIR"
 
-# Abort if it can't create needed directory
+# Abort if needed directory cannot be created
 if [ ! -d "$TMPDIR" ]; then
   ui_print "- E: Cannot create needed directory."
   abort
