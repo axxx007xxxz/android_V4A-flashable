@@ -25,6 +25,11 @@ cp_perm() {
   chmod $5 $2
 }
 
+abort() {
+  ui_print "Aborting!"
+  exit 1
+}
+
 
 # Mount partitions
 mount -o ro -t auto /system
@@ -32,8 +37,8 @@ mount -o ro -t auto /vendor
 
 # Abort if unzip isn't found
 if [ ! -f "/sbin/unzip" ]; then
-  ui_print "- NO UNZIP FOUND. ABORTING!"
-  exit 1
+  ui_print "- E: No 'unzip' found."
+  abort
 fi
 
 # Remount partitions with rw permissions
@@ -48,8 +53,8 @@ mkdir "$TMPDIR" && cd "$TMPDIR"
 
 # Abort if it can't create needed directory
 if [ ! -d "$TMPDIR" ]; then
-  ui_print "- CANNOT CREATE NEEDED DIRECTORY. ABORTING!"
-  exit 1
+  ui_print "- E: Cannot create needed directory."
+  abort
 fi
 
 # Unzip all files and prepare for the installation
