@@ -5,8 +5,12 @@
 # Thanks Chainfire and osm0sis
 
 
+# Define basics stuff
 OUTFD=/proc/self/fd/$2
 ZIP="$3"
+
+TMPDIR=/tmp/v4a
+COM=$TMPDIR/common
 
 ui_print() {
   until [ ! "$1" ]; do
@@ -21,47 +25,50 @@ cp_perm() {
   chmod $5 $2
 }
 
+
+# Mount partitions
 mount -o ro -t auto /system
 mount -o ro -t auto /vendor
 
-
-
+# Abort if unzip isn't found
 if [ ! -f "/sbin/unzip" ]; then
   ui_print "- NO UNZIP FOUND. ABORTING!"
   exit 1
 fi
 
+# Remount partitions with rw permissions
 mount -o rw,remount -t auto /system
 mount -o rw,remount -t auto /vendor
 
-
-
+# Start extracting files
 ui_print "- Extracting files"
 
-TMPDIR=/tmp/v4a
+# Create needed directory
 mkdir "$TMPDIR" && cd "$TMPDIR"
 
+# Abort if it can't create needed directory
 if [ ! -d "$TMPDIR" ]; then
   ui_print "- CANNOT CREATE NEEDED DIRECTORY. ABORTING!"
   exit 1
 fi
 
+# Unzip all files and prepare for the installation
 unzip -o "$ZIP"
 
-
-
-COM=$TMPDIR/common
-
+# Check if the device uses /system/system partition
 test -f /system/system/build.prop && root=/system
 
+# Remove current audio_effects.conf file(s) and V4A's lib if it's there
 rm -f $root/system/etc/audio_effects.conf
 rm -f $root/system/vendor/etc/audio_effects.conf
 rm -f /vendor/etc/audio_effects.conf
 rm -f $root/system/lib/soundfx/libv4a_fx_jb_NEON.so
 
+# Copy new files and set right owner and permissions
 cp_perm $COM/audio_effects.conf $root/system/etc/audio_effects.conf 0 0 0644
 cp_perm $COM/libv4a_fx_jb_NEON.so $root/system/lib/soundfx/libv4a_fx_jb_NEON.so 0 0 0644
 
+# Unmount partitions and exit
 umount /vendor
 umount /system
 ui_print "Done."
